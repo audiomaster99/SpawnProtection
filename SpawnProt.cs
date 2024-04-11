@@ -23,13 +23,15 @@ public class Config : BasePluginConfig
     public bool AttackerCenterMsg { get; set; } = true;
     [JsonPropertyName("spawn-prot-transparent-model")]
     public bool TransparentModel { get; set; } = true;
+    [JsonPropertyName("ct-protection-only")]
+    public bool CTProtOnly { get; set; } = true;
 }
 public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
 {
     public override string ModuleName => "SpawnProt";
     public override string ModuleAuthor => "audio_brutalci";
     public override string ModuleDescription => "Simple spawn protection for CS2";
-    public override string ModuleVersion => "0.0.1";
+    public override string ModuleVersion => "0.0.2";
 
 
     public required Config Config { get; set; }
@@ -57,6 +59,8 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
     {
         Color transparentColor = Color.FromArgb(170, 255, 255, 255);
         Color defaultColor = Color.FromArgb(255, 255, 255, 255);
+
+        if (player == null) { return; }
         player.PlayerPawn.Value!.Render = transparentColor;
         Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
 
@@ -75,6 +79,11 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
     {
         CCSPlayerController? player = @event.Userid;
         int playerIndex = (int)player.Index;
+
+        if (Config.CTProtOnly && player.TeamNum == (byte)CsTeam.Terrorist)
+        {
+            return HookResult.Continue;
+        }
 
         if (IsValid(player) && IsConnected(player) && IsAlive(player))
         {
