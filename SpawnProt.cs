@@ -102,6 +102,8 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
     {
         CCSPlayerController player = @event.Userid;
         var Attacker = @event.Attacker;
+        var _player = player.PlayerName;
+        var _attacker = Attacker.PlayerName;
 
         if (playerHasSpawnProt[player.Index] == 1 && IsValid(player) && IsAlive(player) && IsConnected(player))
         {
@@ -113,7 +115,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
                 {
                     player.PrintToCenter("You are invulnerable for a short time");
                 }
-                Logger.LogInformation($" {Attacker.PlayerName} inflicted {@event.DmgHealth} DMG to {player.PlayerName}. HP {player.PlayerPawn.Value.Health}");
+                Logger.LogInformation($" {_attacker} inflicted {@event.DmgHealth} DMG to {_player}. HP {player.PlayerPawn.Value.Health}");
             }
             if (@event.DmgArmor > 0 && player.PlayerPawn.Value != null)
             {
@@ -122,7 +124,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
             }
             if (Attacker != null && Config.AttackerCenterMsg) 
             {
-                Attacker.PrintToCenter($" {player.PlayerName} is spawn protected and cannot be damaged.");
+                Attacker.PrintToCenter($" {_player} is spawn protected and cannot be damaged.");
             }
         }
         return HookResult.Continue; 
