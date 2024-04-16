@@ -60,7 +60,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
         Color transparentColor = Color.FromArgb(170, 255, 255, 255);
         Color defaultColor = Color.FromArgb(255, 255, 255, 255);
 
-        if (player == null) { return; }
+        if (player == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null) { return; }
         player.PlayerPawn.Value!.Render = transparentColor;
         Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
 
@@ -103,7 +103,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
         CCSPlayerController player = @event.Userid;
         var Attacker = @event.Attacker;
 
-        if (playerHasSpawnProt[player.Index] == 1 && IsValid(player) && IsAlive(player))
+        if (playerHasSpawnProt[player.Index] == 1 && IsValid(player) && IsAlive(player) && IsConnected(player))
         {
             if (@event.DmgHealth > 0 && player.PlayerPawn.Value != null)
             {
