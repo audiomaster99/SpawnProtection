@@ -61,15 +61,21 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
         Color defaultColor = Color.FromArgb(255, 255, 255, 255);
 
         if (player == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null) { return; }
-        player.PlayerPawn.Value!.Render = transparentColor;
-        Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
+
+        Server.NextFrame(() =>
+        {
+            player.PlayerPawn.Value!.Render = transparentColor;
+            Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
+        });
 
         int playerIndex = (int)player.Index;
-
-        AddTimer(Config.SpawnProtTime, () =>
+        Server.NextFrame(() =>
         {
-            player.PlayerPawn.Value!.Render = defaultColor;
-            Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
+            AddTimer(Config.SpawnProtTime, () =>
+            {
+                player.PlayerPawn.Value!.Render = defaultColor;
+                Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
+            });
         });
     }
 
