@@ -126,7 +126,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
             if (@event.DmgArmor > 0 && player.PlayerPawn.Value != null)
             {
                 player.PlayerPawn.Value.ArmorValue += @event.DmgArmor;
-                Utilities.SetStateChanged(player.PlayerPawn.Value, "CCSPlayerPawnBase", "m_ArmorValue");
+                Utilities.SetStateChanged(player.PlayerPawn.Value, "CCSPlayerPawn", "m_ArmorValue");
             }
             if (Attacker != null && Config.AttackerCenterMsg) 
             {
