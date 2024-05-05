@@ -84,7 +84,6 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
     public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         CCSPlayerController? player = @event.Userid;
-        int playerIndex = (int)player.Index;
 
         if (Config.CTProtOnly && player.TeamNum == (byte)CsTeam.Terrorist)
         {
@@ -121,7 +120,7 @@ public partial class SpawnProt : BasePlugin, IPluginConfig<Config>
                 {
                     player.PrintToCenter("You are invulnerable for a short time");
                 }
-                Logger.LogInformation($" {_attacker} inflicted {@event.DmgHealth} DMG to {_player}. HP {player.PlayerPawn.Value.Health}");
+                //Logger.LogInformation($" {_attacker} inflicted {@event.DmgHealth} DMG to {_player}. HP {player.PlayerPawn.Value.Health}");
             }
             if (@event.DmgArmor > 0 && player.PlayerPawn.Value != null)
             {
