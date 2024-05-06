@@ -3,7 +3,7 @@ namespace SpawnProt
 	using CounterStrikeSharp.API.Core;
 	using System.Text.Json.Serialization;
 
-	public sealed class Config : BasePluginConfig
+	public sealed class PluginConfig : BasePluginConfig
 	{
 		[JsonPropertyName("spawn-protection-time")]
 		public float SpawnProtTime { get; set; } = 10.0f;

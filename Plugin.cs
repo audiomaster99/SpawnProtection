@@ -3,7 +3,7 @@
     using CounterStrikeSharp.API.Core;
     using Microsoft.Extensions.Logging;
 
-    public sealed partial class SpawnProt : BasePlugin, IPluginConfig<Config>
+    public sealed partial class SpawnProt : BasePlugin, IPluginConfig<PluginConfig>
     {
         public override string ModuleName => "SpawnProt";
         public override string ModuleAuthor => "audio_brutalci";
@@ -15,13 +15,12 @@
         public static int FreezeTime;
         CCSGameRules? gameRules;
 
-        public required Config Config { get; set; }
-
-        public void OnConfigParsed(Config config)
+        public required PluginConfig Config { get; set; } = new PluginConfig();
+        public void OnConfigParsed(PluginConfig config)
         {
             if (config.Version < Config.Version)
             {
-                base.Logger.LogWarning("Plugin config is outdated. Please consider updating the configuration file. [Expected: {0} | Current: {1}]", this.Config.Version, config.Version);
+                base.Logger.LogWarning("The plugin configuration is outdated. Please consider updating the configuration file. [Expected: {0} | Current: {1}]", this.Config.Version, config.Version);
             }
 
             this.Config = config;
