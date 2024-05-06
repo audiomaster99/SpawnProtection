@@ -1,0 +1,7 @@
+{
+	"player_isprotected": "You are invulnerable \n Protection ends in > {0} <",
+	"attacker_playerisprotected": "{player} is spawn protected and cannot be damaged.",
+	"player_isnotprotected": "WARNING! \n SPAWN PROTECTION ENDED",
+
+	"center_isprotected": "YOU ARE SPAWN PROTECTED"
+}
