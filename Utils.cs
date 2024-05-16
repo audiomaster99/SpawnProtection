@@ -82,13 +82,13 @@ namespace SpawnProt
 
 			Color defaultColor = Color.FromArgb(255, 255, 255, 255);
 			Server.NextFrame(() =>
-						{
-							if (player.PlayerPawn is not null && player.PlayerPawn.Value is not null && player.IsAlive())
-							{
-								player.PlayerPawn.Value.Render = defaultColor;
-								Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
-							}
-						});
+			{
+				if (player.PlayerPawn is not null && player.PlayerPawn.Value is not null && player.IsAlive())
+				{
+					player.PlayerPawn.Value.Render = defaultColor;
+					Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseModelEntity", "m_clrRender");
+				}
+			});
 		}
 		void GetGameRules() => gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
 

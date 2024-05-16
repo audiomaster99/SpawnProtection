@@ -8,10 +8,11 @@
         public override string ModuleName => "SpawnProt";
         public override string ModuleAuthor => "audio_brutalci";
         public override string ModuleDescription => "Simple spawn protection for CS2";
-        public override string ModuleVersion => "0.0.3";
+        public override string ModuleVersion => "0.0.4";
 
         public static SpawnProtectionState[] playerHasSpawnProt = new SpawnProtectionState[64];
         public static readonly bool[] CenterMessage = new bool[64];
+        public static readonly float[] protTimer = new float[64];
         public static int FreezeTime;
         CCSGameRules? gameRules;
 
@@ -20,7 +21,7 @@
         {
             if (config.Version < Config.Version)
             {
-                base.Logger.LogWarning("The plugin configuration is outdated. Please consider updating the configuration file. [Expected: {0} | Current: {1}]", this.Config.Version, config.Version);
+                base.Logger.LogWarning("Plugin configuration is outdated! Please consider updating. [Expected: {0} | Current: {1}]", this.Config.Version, config.Version);
             }
 
             this.Config = config;
@@ -37,13 +38,13 @@
         }
         public void OnTick(CCSPlayerController player)
         {
-            float progressPercentage = CountdownTimer / Config.SpawnProtTime;
+            float progressPercentage = protTimer[player.Index] / Config.SpawnProtTime;
             string color = GetColorBasedOnProgress(progressPercentage);
             string progressBar = GenerateProgressBar(progressPercentage);
 
             player.PrintToCenterHtml(
                 $"<font class='fontSize-m' color='orange'>{Localizer["center_isprotected"]}</font><br>" +
-                $"[<font class='fontSize-m' color='{color}'>{(int)CountdownTimer}</font><font color='white'>] SECONDS LEFT!</font><br>" +
+                $"[<font class='fontSize-m' color='{color}'>{(int)protTimer[player.Index]}</font><font color='white'>] SECONDS LEFT!</font><br>" +
                 $"<font class='fontSize-l' color='{color}'>{progressBar}</font>"
             );
         }
@@ -55,7 +56,7 @@
             AddTimer(Config.SpawnProtTime, () =>
             {
                 playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
-                AddTimer(1.0f, () => { player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} "); });
+                AddTimer(0.8f, () => { player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} "); });
             });
         }
 
@@ -71,7 +72,7 @@
         public void HandleCenterMessage(CCSPlayerController player)
         {
             CenterMessage[player.Index] = true;
-            AddTimer(Config.SpawnProtTime + 1.0f, () => { CenterMessage[player.Index] = false; });
+            AddTimer(Config.SpawnProtTime, () => { CenterMessage[player.Index] = false; });
         }
     }
 }

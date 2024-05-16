@@ -15,7 +15,6 @@ namespace SpawnProt
 		{
 			RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
 			RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
-			RegisterEventHandler<EventRoundStart>(OnRoundStart);
 			RegisterEventHandler<EventRoundPrestart>(OnRoundPrestart);
 			RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
 			RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
@@ -38,42 +37,23 @@ namespace SpawnProt
 			Logger.LogInformation("Registered Events and Listeners");
 		}
 
-		public CounterStrikeSharp.API.Modules.Timers.Timer? SpawnTimer;
+		public Timer? SpawnTimer { get; set; }
 		public CounterStrikeSharp.API.Modules.Timers.Timer? renderTimer;
-		public float CountdownTimer;
 
-		public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
-		{
-			SpawnTimer?.Kill();
-			CountdownTimer = Config.SpawnProtTime;
-
-			if (IsWarmup)
-				return HookResult.Continue;
-
-			AddTimer(FreezeTime, () =>
-			{
-				SpawnTimer = AddTimer(0.1f, () =>
-				{
-					if (CountdownTimer <= 0) { SpawnTimer?.Kill(); return; }
-					CountdownTimer -= 0.1f;
-				}, TimerFlags.REPEAT);
-			});
-			return HookResult.Continue;
-		}
 		public HookResult OnRoundPrestart(EventRoundPrestart @event, GameEventInfo info)
 		{
+			SpawnTimer?.Kill();
 			Utilities.GetPlayers().
-			Where(player => player is not null && player.IsValid == true).ToList().ForEach(x => HandleCenterMessage(x));
+			Where(player => player is not null && player.IsValid == true).ToList().ForEach(x => CenterMessage[x.Index] = false);
 
 			return HookResult.Continue;
 		}
 
 		public HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
 		{
+			SpawnTimer?.Kill();
 			Utilities.GetPlayers().
 			Where(player => player is not null && player.IsValid == true).ToList().ForEach(x => CenterMessage[x.Index] = false);
-
-			SpawnTimer?.Kill();
 
 			return HookResult.Continue;
 		}
@@ -104,13 +84,21 @@ namespace SpawnProt
 			if (IsWarmup)
 				return HookResult.Continue;
 
-			AddTimer(FreezeTime, () =>
-			{
-				HandleSpawnProt(player);
+			SpawnTimer?.Kill();
+			protTimer[player.Index] = Config.SpawnProtTime;
 
-				if (Config.TransparentModel)
-					HandlePlayerModel(player);
-			});
+			SpawnTimer = AddTimer(0.1f, () =>
+			{
+				if (protTimer[player.Index] <= 0) { SpawnTimer?.Kill(); return; }
+				protTimer[player.Index] -= 0.1f;
+			}, TimerFlags.REPEAT);
+
+			HandleSpawnProt(player);
+
+			if (Config.TransparentModel)
+				HandlePlayerModel(player);
+
+			HandleCenterMessage(player);
 
 			return HookResult.Continue;
 		}
@@ -156,7 +144,7 @@ namespace SpawnProt
 			Utilities.SetStateChanged(player.PlayerPawn.Value, "CCSPlayerPawn", "m_ArmorValue");
 
 			if (Config.SpawnProtCenterMsg && player.IsAlive())
-				player.PrintToCenter($"{Localizer["player_isprotected", (int)CountdownTimer]}");
+				player.PrintToCenter($"{Localizer["player_isprotected", (int)protTimer[player.Index]]}");
 
 			CCSPlayerController? Attacker = @event.Attacker;
 
