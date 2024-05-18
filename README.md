@@ -6,8 +6,8 @@
 - Render player models transparent
 - Timer with progress bar
 - CT Only protection (can be enabled in config)
-- 
-![Protection Timer](https://media.discordapp.net/attachments/1172576974498177034/1236970784342282260/progressbar2.gif?ex=6639f250&is=6638a0d0&hm=1fdc2e68130fe8ee72d659986828194fc0b52b9c37fab9b3682165fa206aa404&= "Protection Timer")
+  
+![Protection Timer](https://i.imgur.com/7un6m3r.gif= "Protection Timer")
 
 ### Config
 
