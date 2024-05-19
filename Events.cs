@@ -91,18 +91,24 @@ namespace SpawnProt
 			SpawnTimer?.Kill();
 			protTimer[player.Index] = Config.SpawnProtTime;
 
-			SpawnTimer = AddTimer(0.1f, () =>
+			int freezeTimer;
+			freezeTimer = IsFreezeTime ? FreezeTime : 0;
+
+			AddTimer(freezeTimer, () =>
 			{
-				if (protTimer[player.Index] <= 0) { SpawnTimer?.Kill(); return; }
-				protTimer[player.Index] -= 0.1f;
-			}, TimerFlags.REPEAT);
+				SpawnTimer = AddTimer(0.1f, () =>
+				{
+					if (protTimer[player.Index] <= 0) { SpawnTimer?.Kill(); return; }
+					protTimer[player.Index] -= 0.1f;
+				}, TimerFlags.REPEAT);
 
-			HandleSpawnProt(player);
+				HandleSpawnProt(player);
 
-			if (Config.TransparentModel)
-				HandlePlayerModel(player);
+				if (Config.TransparentModel)
+					HandlePlayerModel(player);
 
-			HandleCenterMessage(player);
+				HandleCenterMessage(player);
+			});
 
 			return HookResult.Continue;
 		}

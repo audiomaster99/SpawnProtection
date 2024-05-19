@@ -9,7 +9,7 @@
         public override string ModuleName => "SpawnProt";
         public override string ModuleAuthor => "audio_brutalci";
         public override string ModuleDescription => "Simple spawn protection for CS2";
-        public override string ModuleVersion => "0.0.5";
+        public override string ModuleVersion => "0.0.6";
 
         public static SpawnProtectionState[] playerHasSpawnProt = new SpawnProtectionState[64];
         public static readonly bool[] CenterMessage = new bool[64];
@@ -53,22 +53,18 @@
 
         public void HandleSpawnProt(CCSPlayerController player)
         {
-            int freezeTimer;
+            playerHasSpawnProt[player.Index] = SpawnProtectionState.Protected;
 
-            if (IsFreezeTime)
-                freezeTimer = FreezeTime;
-            else
-                freezeTimer = 0;
-
-            AddTimer(freezeTimer, () =>
+            AddTimer(Config.SpawnProtTime, () =>
             {
-                playerHasSpawnProt[player.Index] = SpawnProtectionState.Protected;
+                playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
 
-                AddTimer(Config.SpawnProtTime, () =>
+                AddTimer(0.8f, () =>
                 {
-                    playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
-                    AddTimer(0.8f, () => { player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} "); });
+                    if (playerHasSpawnProt[player.Index] == SpawnProtectionState.None)
+                        player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} ");
                 });
+                return;
             });
         }
 
@@ -77,39 +73,22 @@
             if (player is null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value is null)
                 return;
 
-            int freezeTimer;
-
-            if (IsFreezeTime)
-                freezeTimer = FreezeTime;
-            else
-                freezeTimer = 0;
-
-            AddTimer(freezeTimer, () =>
-            {
-                SetPlayerColor(player);
-                AddTimer(Config.SpawnProtTime, () => { ResetPlayerColor(player); });
-            });
+            SetPlayerColor(player);
+            AddTimer(Config.SpawnProtTime, () => { ResetPlayerColor(player); });
         }
 
         public void HandleCenterMessage(CCSPlayerController player)
         {
-            int freezeTimer;
-
-            if (IsFreezeTime)
-                freezeTimer = FreezeTime;
-            else
-                freezeTimer = 0;
-
-            AddTimer(freezeTimer, () =>
-            {
-                CenterMessage[player.Index] = true;
-                AddTimer(Config.SpawnProtTime, () => { CenterMessage[player.Index] = false; });
-            });
+            CenterMessage[player.Index] = true;
+            AddTimer(Config.SpawnProtTime, () => { CenterMessage[player.Index] = false; });
         }
 
         public override void Unload(bool hotReload)
         {
-            VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(OnTakeDamage, HookMode.Pre);
+            if (Config.TriggerHurtEnabled)
+            {
+                VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(OnTakeDamage, HookMode.Pre);
+            }
         }
     }
 }
