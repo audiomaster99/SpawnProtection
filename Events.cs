@@ -18,7 +18,11 @@ namespace SpawnProt
 			RegisterEventHandler<EventRoundPrestart>(OnRoundPrestart);
 			RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
 			RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
-			VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Hook(OnTakeDamage, HookMode.Pre);
+
+			if (Config.TriggerHurtEnabled)
+			{
+				VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Hook(OnTakeDamage, HookMode.Pre);
+			}
 
 			RegisterListener<Listeners.OnTick>(() =>
 			{
@@ -31,8 +35,8 @@ namespace SpawnProt
 			RegisterListener<Listeners.OnMapStart>(name =>
 			{
 				gameRules = null;
-				AddTimer(1.0f, GetGameRules);
-				FreezeTime = ConVar.Find("mp_freezetime")!.GetPrimitiveValue<int>();
+				AddTimer(1.0F, GetGameRules);
+				AddTimer(1.0F, () => { FreezeTime = ConVar.Find("mp_freezetime")!.GetPrimitiveValue<int>(); });
 			});
 			Logger.LogInformation("Registered Events and Listeners");
 		}

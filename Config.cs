@@ -26,7 +26,10 @@ namespace SpawnProt
 		[JsonPropertyName("ct-protection-only")]
 		public bool CTProtOnly { get; set; } = false;
 
+		[JsonPropertyName("trigger-hurt-compatibility")]
+		public bool TriggerHurtEnabled { get; set; } = false;
+
 		[JsonPropertyName("ConfigVersion")]
-		public override int Version { get; set; } = 3;
+		public override int Version { get; set; } = 4;
 	}
 }

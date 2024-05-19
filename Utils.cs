@@ -59,6 +59,7 @@ namespace SpawnProt
 
 			if (player is null)
 				return;
+
 			Color transparentColor;
 
 			if (player.TeamNum == (byte)CsTeam.Terrorist)
@@ -90,6 +91,7 @@ namespace SpawnProt
 				}
 			});
 		}
+
 		void GetGameRules() => gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
 
 		public bool IsWarmup
@@ -100,6 +102,17 @@ namespace SpawnProt
 					GetGameRules();
 
 				return gameRules is not null && gameRules.WarmupPeriod;
+			}
+		}
+
+		public bool IsFreezeTime
+		{
+			get
+			{
+				if (gameRules is null)
+					GetGameRules();
+
+				return gameRules is not null && gameRules.FreezePeriod;
 			}
 		}
 	}
