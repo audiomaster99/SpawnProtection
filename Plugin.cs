@@ -9,7 +9,7 @@
         public override string ModuleName => "SpawnProt";
         public override string ModuleAuthor => "audio_brutalci";
         public override string ModuleDescription => "Simple spawn protection for CS2";
-        public override string ModuleVersion => "0.0.6";
+        public override string ModuleVersion => "0.0.7";
 
         public static SpawnProtectionState[] playerHasSpawnProt = new SpawnProtectionState[64];
         public static readonly bool[] CenterMessage = new bool[64];
@@ -61,7 +61,7 @@
 
                 AddTimer(0.8f, () =>
                 {
-                    if (playerHasSpawnProt[player.Index] == SpawnProtectionState.None)
+                    if (playerHasSpawnProt[player.Index] == SpawnProtectionState.None && Config.SpawnProtEndAnnouce)
                         player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} ");
                 });
                 return;

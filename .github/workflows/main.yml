@@ -7,7 +7,6 @@ on:
     branches: [ "main" ]
 
 env:
-  BUILD_NUMBER: ${{ github.run_number }}
   PROJECT_PATH: "SpawnProt.csproj"
   PROJECT_NAME: "SpawnProt"
   OUTPUT_PATH: "./SpawnProt"
@@ -22,11 +21,11 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
     - name: Restore
       run: dotnet restore
     - name: Build
-      run: dotnet build ${{ env.PROJECT_PATH }} -c SpawnProt -o ${{ env.OUTPUT_PATH }}
+      run: dotnet build ${{ env.PROJECT_PATH }} -c Release -o ${{ env.OUTPUT_PATH }}
 
   publish:
     if: github.event_name == 'push'
@@ -38,28 +37,47 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
     - name: Restore
       run: dotnet restore
     - name: Build
-      run: dotnet build ${{ env.PROJECT_PATH }} -c SpawnProt -o ${{ env.OUTPUT_PATH }}
+      run: dotnet build ${{ env.PROJECT_PATH }} -c Release -o ${{ env.OUTPUT_PATH }}
     - name: Clean files
       run: |
         rm -f \
           ${{ env.OUTPUT_PATH }}/CounterStrikeSharp.API.dll \
           ${{ env.OUTPUT_PATH }}/McMaster.NETCore.Plugins.dll \
           ${{ env.OUTPUT_PATH }}/Microsoft.DotNet.PlatformAbstractions.dll \
-          ${{ env.OUTPUT_PATH }}/Microsoft.Extensions.DependencyModel.dll \
+          ${{ env.OUTPUT_PATH }}/Microsoft.Extensions.DependencyModel.dll
+    - name: Read Version
+      id: get_version
+      run: echo "::set-output name=version::$(cat VERSION)"
+    - name: Increment Version
+      id: inc_version
+      run: |
+        old_version=$(cat VERSION)
+        old_patch=$(echo $old_version | cut -d. -f3)
+        new_patch=$((old_patch + 1))
+        new_version="0.0.${new_patch}"
+        echo $new_version > VERSION
+        echo "::set-output name=version::$new_version"
+    - name: Commit New Version
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add VERSION
+        git commit -m "${{ steps.inc_version.outputs.version }}"
+        git push
     - name: Zip
       uses: thedoctor0/zip-release@0.7.5
       with:
         type: 'zip'
         filename: '${{ env.PROJECT_NAME }}.zip'
         path: ${{ env.OUTPUT_PATH }}
-    - name: CS2-SpawnProt
+    - name: Create Release
       uses: ncipollo/release-action@v1.12.0
       with:
         artifacts: "${{ env.PROJECT_NAME }}.zip"
-        name: "Build ${{ env.BUILD_NUMBER }}"
-        tag: "build-${{ env.BUILD_NUMBER }}"
-        body: |
+        name: "${{ env.PROJECT_NAME }} v${{ steps.inc_version.outputs.version }}"
+        tag: "v${{ steps.inc_version.outputs.version }}"
+        body: "Release ${{ env.PROJECT_NAME }} v${{ steps.inc_version.outputs.version }}"
