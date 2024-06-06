@@ -3,7 +3,7 @@ namespace SpawnProt
 	using CounterStrikeSharp.API;
 	using CounterStrikeSharp.API.Core;
 	using CounterStrikeSharp.API.Modules.Cvars;
-    using CounterStrikeSharp.API.Modules.Memory;
+	using CounterStrikeSharp.API.Modules.Memory;
 	using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 	using CounterStrikeSharp.API.Modules.Timers;
 	using CounterStrikeSharp.API.Modules.Utils;
@@ -18,6 +18,7 @@ namespace SpawnProt
 			RegisterEventHandler<EventRoundPrestart>(OnRoundPrestart);
 			RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
 			RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+			RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
 
 			if (Config.TriggerHurtEnabled)
 			{
@@ -56,7 +57,7 @@ namespace SpawnProt
 
 		public HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
 		{
-            Utilities.GetPlayers().
+			Utilities.GetPlayers().
 			Where(player => player is not null && player.IsValid == true).ToList().ForEach(x => { CenterMessage[x.Index] = false; spawnTimer[x.Index]?.Kill(); });
 
 			return HookResult.Continue;
@@ -69,8 +70,8 @@ namespace SpawnProt
 			if (player is null)
 				return HookResult.Continue;
 
-            spawnTimer[player.Index]?.Kill();
-            CenterMessage[player.Index] = false;
+			spawnTimer[player.Index]?.Kill();
+			CenterMessage[player.Index] = false;
 			playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
 
 			return HookResult.Continue;
@@ -97,7 +98,7 @@ namespace SpawnProt
 
 			AddTimer(freezeTimer, () =>
 			{
-                spawnTimer[player.Index] = AddTimer(0.1f, () =>
+				spawnTimer[player.Index] = AddTimer(0.1f, () =>
 				{
 					if (protTimer[player.Index] <= 0) { SpawnTimer?.Kill(); return; }
 					protTimer[player.Index] -= 0.1f;
@@ -148,7 +149,7 @@ namespace SpawnProt
 		private void HandleProtectedPlayer(CCSPlayerController player, EventPlayerHurt @event)
 		{
 			string playerName = player.PlayerName ?? "Unknown";
-            if (player.IsAlive())
+			if (player.IsAlive())
 			{
 				player.PlayerPawn!.Value!.Health += @event.DmgHealth;
 				Utilities.SetStateChanged(player.PlayerPawn.Value, "CBaseEntity", "m_iHealth");
@@ -168,6 +169,29 @@ namespace SpawnProt
 					Attacker.PrintToCenter($" {Localizer["attacker_playerisprotected", playerName]}");
 				}
 			}
+		}
+
+		public HookResult OnWeaponFire(EventWeaponFire @event, GameEventInfo info)
+		{
+			CCSPlayerController? player = @event.Userid;
+
+			if (player is null || !player.IsAlive())
+				return HookResult.Continue;
+
+			if (!Config.StopProtectionOnWeaponFire)
+				return HookResult.Continue;
+
+			if (playerHasSpawnProt[player.Index] == SpawnProtectionState.Protected)
+			{
+				playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
+
+				if (Config.SpawnProtEndAnnouce)
+				{
+					player.PrintToCenterAlert("SPAWN PROTECTION ENDED");
+				}
+			}
+
+			return HookResult.Continue;
 		}
 	}
 }
