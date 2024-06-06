@@ -25,31 +25,23 @@ namespace SpawnProt
 
 		private string GetColorBasedOnProgress(float progress)
 		{
-			int red, green, blue;
+			// Ensure progress is within the range [0, 1]
+			progress = Math.Clamp(progress, 0, 1);
 
-			if (progress < 0.40)
+			int red, green, blue = 0;
+
+			if (progress < 0.5f)
 			{
+				// From red to yellow (progress 0 to 0.5)
 				red = 255;
-				green = (int)(255 * progress * 3);
-				blue = 0;
-			}
-			else if (progress < 0.66)
-			{
-				red = 255;
-				green = 255;
-				blue = 0;
+				green = (int)(255 * (progress * 2));
 			}
 			else
 			{
-				red = (int)(255 * (1 - ((progress - 0.86) * 3)));
+				// From yellow to green (progress 0.5 to 1)
+				red = (int)(255 * (2 * (1 - progress)));
 				green = 255;
-				blue = 0;
 			}
-
-			// Clamp the values to avoid any overflow or underflow
-			red = Math.Clamp(red, 0, 255);
-			green = Math.Clamp(green, 0, 255);
-			blue = Math.Clamp(blue, 0, 255);
 
 			return $"#{red:X2}{green:X2}{blue:X2}";
 		}
