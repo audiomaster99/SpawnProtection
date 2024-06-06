@@ -29,6 +29,12 @@ namespace SpawnProt
 		[JsonPropertyName("trigger-hurt-compatibility")]
 		public bool TriggerHurtEnabled { get; set; } = false;
 
+		[JsonPropertyName("stop-protection-on-player-move")]
+		public bool StopProtectionOnMove { get; set; } = false;
+
+		[JsonPropertyName("stop-protection-on-weapon-fire")]
+		public bool StopProtectionOnWeaponFire { get; set; } = false;
+
 		[JsonPropertyName("ConfigVersion")]
 		public override int Version { get; set; } = 4;
 	}
