@@ -184,6 +184,8 @@ namespace SpawnProt
 			if (playerHasSpawnProt[player.Index] == SpawnProtectionState.Protected)
 			{
 				playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
+				CenterMessage[player.Index] = false;
+				spawnTimer[player.Index]?.Kill();
 
 				if (Config.SpawnProtEndAnnouce)
 				{
