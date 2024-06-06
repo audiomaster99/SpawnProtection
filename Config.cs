@@ -36,6 +36,6 @@ namespace SpawnProt
 		public bool StopProtectionOnWeaponFire { get; set; } = false;
 
 		[JsonPropertyName("ConfigVersion")]
-		public override int Version { get; set; } = 4;
+		public override int Version { get; set; } = 5;
 	}
 }

@@ -9,7 +9,7 @@
         public override string ModuleName => "SpawnProt";
         public override string ModuleAuthor => "audio_brutalci";
         public override string ModuleDescription => "Simple spawn protection for CS2";
-        public override string ModuleVersion => "0.0.7";
+        public override string ModuleVersion => "0.0.9";
 
         public static SpawnProtectionState[] playerHasSpawnProt = new SpawnProtectionState[64];
         public static readonly bool[] CenterMessage = new bool[64];
