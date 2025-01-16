@@ -7,9 +7,9 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_PATH: "SpawnProt.csproj"
-  PROJECT_NAME: "SpawnProt"
-  OUTPUT_PATH: "./SpawnProt"
+  PROJECT_PATH: "SpawnProtection.csproj"
+  PROJECT_NAME: "SpawnProtection"
+  OUTPUT_PATH: "./SpawnProtection"
 
 jobs:
   build:
