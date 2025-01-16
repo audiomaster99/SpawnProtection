@@ -3,25 +3,12 @@
 ## Features
 
 - Configurable spawn protection
+- Customisiable display message
 - Render player models transparent
 - Timer with progress bar
 - CT Only protection (can be enabled in config)
 
-![Protection Timer](https://i.imgur.com/7un6m3r.gif= "Protection Timer")
-
-## Config
-
-```
-  "spawn-protection-time": 10, // for how long will player be protected in seconds
-  "spawn-prot-center-message": true, //enable center messages
-  "spawn-prot-end-announce": true, // enablee announcement when spawn protection ended
-  "attacker-center-message": true, // enable warning message for attacker
-  "enable-center-html-message": true, // enable timer and progress bar
-  "spawn-prot-transparent-model": true, // enable transparent models while protected
-  "ct-protection-only": false, // enable protection only for Counter-Terrorists
-  "trigger-hurt-compatibility": false // enable protection from trigger_hurt (Disable if you're on windowsOs)
-  "ConfigVersion": 4 // dont change!
-```
+![Spawn Protection Plugin](https://i.imgur.com/3ZaXW64.gif= "SpawnProtection")
 
 ## Dependencies
 
@@ -30,4 +17,4 @@
 
 ## Installation
 
-- Place plugin contents to **addons/counterstrikesharp/plugins/SpawnProt**
+- Download latest [Release](https://github.com/audiomaster99/SpawnProtection/releases) and place its contents inside **csgo/addons/counterstrikesharp/plugins/SpawnProtection**

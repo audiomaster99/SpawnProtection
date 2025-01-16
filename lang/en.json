@@ -1,7 +1,12 @@
 {
-	"player_isprotected": "You are invulnerable \n Protection ends in > {0} <",
-	"attacker_playerisprotected": "{0} is spawn protected and cannot be damaged.",
-	"player_isnotprotected": "WARNING! \n SPAWN PROTECTION ENDED",
+	"phrases.center_isprotected": "<font class='fontSize-s stratum-bold-italic' color='#80eb34'>YOU ARE SPAWN PROTECTED<br>",
+	"phrases.seconds_left": "</font><font class='fontSize-xm stratum-bold-mono' color='{0}'>{1}</font><font color='#c5c7c3' class='fontSize-m stratum-bold-mono'> SECONDS LEFT</font>",
+	"phrases.protection_ended": "<font color='yellow' class='fontSize-s stratum-bold-italic'>WARNING!</font> <br> <font color='red' class='fontSize-m stratum-bold-italic'>SPAWN PROTECTION ENDED",
+	"phrases.you_have_spawn_protection": "YOU HAVE SPAWN PROTECTION",
+	"phrases.you_are_protected": "You are invulnerable \n Protection ends in > {0} <",
 
-	"center_isprotected": "YOU ARE SPAWN PROTECTED"
+	"progressbar": "</font><font class='fontSize-l' color='{0}'>{1}</font>",
+	"progressbar.total_bars": "12",
+	"progressbar.empty_part":"▱",
+	"progressbar.filled_part": "▱"
 }

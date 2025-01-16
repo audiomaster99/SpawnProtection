@@ -1,28 +1,34 @@
-﻿namespace SpawnProt
+﻿namespace SpawnProtection
 {
+    using CounterStrikeSharp.API;
     using CounterStrikeSharp.API.Core;
+    using CounterStrikeSharp.API.Modules.Cvars;
+    using CounterStrikeSharp.API.Modules.Extensions;
     using CounterStrikeSharp.API.Modules.Memory;
     using Microsoft.Extensions.Logging;
 
     public sealed partial class SpawnProt : BasePlugin, IPluginConfig<PluginConfig>
     {
-        public override string ModuleName => "SpawnProt";
-        public override string ModuleAuthor => "audio_brutalci";
-        public override string ModuleDescription => "Simple spawn protection for CS2";
-        public override string ModuleVersion => "0.0.9";
+        public override string ModuleName => "SpawnProtection";
+        public override string ModuleAuthor => "itsAudio @ Kitsune-Lab.com";
+        public override string ModuleDescription => "https://github.com/audiomaster99/SpawnProtection";
+        public override string ModuleVersion => "1.0.0";
 
-        public static SpawnProtectionState[] playerHasSpawnProt = new SpawnProtectionState[64];
-        public static readonly bool[] CenterMessage = new bool[64];
-        public static readonly float[] protTimer = new float[64];
-        public static int FreezeTime;
-        CCSGameRules? gameRules;
-        public required PluginConfig Config { get; set; } = new PluginConfig();
+        internal readonly Dictionary<uint, PlayerState> _playerStates = new();
+        public static HashSet<CCSPlayerController> playerCache = [];
+        public HashSet<CCSPlayerController> protectedPlayers = [];
+        private CCSGameRules? gameRules;
+        private float _freezeTime;
+
+        public PluginConfig Config { get; set; } = new PluginConfig();
+        public static SpawnProt Instance { get; private set; } = new();
 
         public void OnConfigParsed(PluginConfig config)
         {
             if (config.Version < Config.Version)
             {
                 base.Logger.LogWarning("Plugin configuration is outdated! Please consider updating. [Expected: {0} | Current: {1}]", this.Config.Version, config.Version);
+                config.Update<PluginConfig>();
             }
 
             this.Config = config;
@@ -30,65 +36,99 @@
 
         public override void Load(bool hotReload)
         {
+            Instance = this;
+
             RegisterEventsListeners();
+
+            _freezeTime = ConVar.Find("mp_freezetime")!.GetPrimitiveValue<int>();
 
             if (hotReload)
             {
-                SpawnTimer?.Kill();
+                _playerStates.Clear();
+                playerCache.ToList().ForEach(p => StopSpawnProtection(p, new PlayerState()));
             }
         }
 
         public void OnTick(CCSPlayerController player)
         {
-            float progressPercentage = protTimer[player.Index] / Config.SpawnProtTime;
-            string color = GetColorBasedOnProgress(progressPercentage);
-            string progressBar = GenerateProgressBar(progressPercentage);
+            if (!IsPlayerValid(player) || !player.IsProtected())
+                return;
 
-            player.PrintToCenterHtml(
-                $"<font class='fontSize-m' color='orange'>{Localizer["center_isprotected"]}</font><br>" +
-                $"[<font class='fontSize-m' color='{color}'>{(int)protTimer[player.Index]}</font><font color='white'>] SECONDS LEFT!</font><br>" +
-                $"<font class='fontSize-l' color='{color}'>{progressBar}</font>"
-            );
+            DisplayProtectionStatus(player, _playerStates[player.Index]);
+            CheckMovementViolation(player, _playerStates[player.Index]);
         }
 
-        public void HandleSpawnProt(CCSPlayerController player)
+        private bool IsPlayerValid(CCSPlayerController? player)
         {
-            playerHasSpawnProt[player.Index] = SpawnProtectionState.Protected;
-
-            AddTimer(Config.SpawnProtTime, () =>
+            if (player is null || player.IsHLTV || !player.IsValid || player.PlayerPawn.Value is null)
             {
-                playerHasSpawnProt[player.Index] = SpawnProtectionState.None;
-
-                AddTimer(0.8f, () =>
-                {
-                    if (playerHasSpawnProt[player.Index] == SpawnProtectionState.None && Config.SpawnProtEndAnnouce)
-                        player.PrintToCenterAlert($" {Localizer["player_isnotprotected"]} ");
-                });
-                return;
-            });
+                if (player is not null)
+                    protectedPlayers.Remove(player);
+                return false;
+            }
+            return true;
         }
 
-        public void HandlePlayerModel(CCSPlayerController player)
+        private void DisplayProtectionStatus(CCSPlayerController player, PlayerState playerState)
         {
-            if (player is null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value is null)
-                return;
+            float progressPercentage = playerState.ProtectionTimer / Config.SpawnProtTime;
+            string displayMsg;
 
-            SetPlayerColor(player);
-            AddTimer(Config.SpawnProtTime, () => { ResetPlayerColor(player); });
+            if (playerState.ProtectionTimer > 0.1f)
+            {
+                string color = GetColorBasedOnProgress(progressPercentage);
+                displayMsg =
+                Localizer["phrases.center_isprotected"] +
+                Localizer["phrases.seconds_left", color, (int)playerState.ProtectionTimer] +
+                Localizer["progressbar", color, GenerateProgressBar(progressPercentage)];
+            }
+            else
+                displayMsg = Localizer["phrases.protection_ended"];
+
+            player.PrintToCenterHtml(displayMsg);
         }
 
-        public void HandleCenterMessage(CCSPlayerController player)
+        private string ProtectionEndedString
+            => Localizer["phrases.protection_ended"];
+
+        private void CheckMovementViolation(CCSPlayerController player, PlayerState playerState)
         {
-            CenterMessage[player.Index] = true;
-            AddTimer(Config.SpawnProtTime, () => { CenterMessage[player.Index] = false; });
+            if (Config.StopProtectionOnMove && player.PlayerPawn.Value!.HasMovedSinceSpawn)
+                StopSpawnProtection(player, playerState);
+        }
+
+        public void StartSpawnProtection(CCSPlayerController player)
+        {
+            protectedPlayers.Add(player);
+
+            if (!_playerStates.TryGetValue(player.Index, out var state))
+            {
+                state = new PlayerState();
+                _playerStates[player.Index] = state;
+            }
+
+            state.ShowCenterMessage = true;
+            state.ProtectionState = ProtectionState.Protected;
+            state.ProtectionTimer = Config.SpawnProtTime;
+            Server.NextFrame(() => HandleTransparentModel(player, true));
+
+            AddTimer(IsFreezeTime ? _freezeTime : 0f, () => CreateProtectionTimer(player, state));
+        }
+
+        public void StopSpawnProtection(CCSPlayerController player, PlayerState playerState, bool isDead = false)
+        {
+            protectedPlayers.Remove(player);
+
+            playerState.ShowCenterMessage = false;
+            playerState.ProtectionTimer = 0;
+            playerState.SpawnTimer?.Kill();
+            playerState.ProtectionState = ProtectionState.None;
+            Server.NextFrame(() => HandleTransparentModel(player, true));
         }
 
         public override void Unload(bool hotReload)
         {
-            if (Config.TriggerHurtEnabled)
-            {
-                VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(OnTakeDamage, HookMode.Pre);
-            }
+            VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(OnTakeDamage, HookMode.Pre);
         }
     }
 }

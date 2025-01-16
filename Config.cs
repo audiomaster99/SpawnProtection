@@ -1,41 +1,35 @@
-namespace SpawnProt
+namespace SpawnProtection
 {
 	using CounterStrikeSharp.API.Core;
 	using System.Text.Json.Serialization;
 
 	public sealed class PluginConfig : BasePluginConfig
 	{
-		[JsonPropertyName("spawn-protection-time")]
+		[JsonPropertyName("protection-time")]
 		public float SpawnProtTime { get; set; } = 10.0f;
 
-		[JsonPropertyName("spawn-prot-center-message")]
-		public bool SpawnProtCenterMsg { get; set; } = true;
+		[JsonPropertyName("disable-during-warmup")]
+		public bool DisableDuringWarmup { get; set; } = true;
 
 		[JsonPropertyName("spawn-prot-end-announce")]
 		public bool SpawnProtEndAnnouce { get; set; } = true;
 
-		[JsonPropertyName("attacker-center-message")]
-		public bool AttackerCenterMsg { get; set; } = true;
-
-		[JsonPropertyName("enable-center-html-message")]
+		[JsonPropertyName("display-timer")]
 		public bool CenterHtmlMessage { get; set; } = true;
 
-		[JsonPropertyName("spawn-prot-transparent-model")]
+		[JsonPropertyName("render-models-transparent")]
 		public bool TransparentModel { get; set; } = true;
 
 		[JsonPropertyName("ct-protection-only")]
 		public bool CTProtOnly { get; set; } = false;
 
-		[JsonPropertyName("trigger-hurt-compatibility")]
-		public bool TriggerHurtEnabled { get; set; } = false;
-
-		[JsonPropertyName("stop-protection-on-player-move")]
+		[JsonPropertyName("stop-on-player-move")]
 		public bool StopProtectionOnMove { get; set; } = false;
 
-		[JsonPropertyName("stop-protection-on-weapon-fire")]
+		[JsonPropertyName("stop-on-weapon-fire")]
 		public bool StopProtectionOnWeaponFire { get; set; } = false;
 
 		[JsonPropertyName("ConfigVersion")]
-		public override int Version { get; set; } = 5;
+		public override int Version { get; set; } = 1;
 	}
 }
