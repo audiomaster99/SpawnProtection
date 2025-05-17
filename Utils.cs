@@ -47,12 +47,12 @@ namespace SpawnProtection
 			return $"#{red:X2}{green:X2}{blue:X2}";
 		}
 
-		private void HandleTransparentModel(CCSPlayerController player, bool isTransparent = false)
+		private void HandleTransparentModel(CCSPlayerController? player, bool isTransparent = false)
 		{
 			if (!Config.TransparentModel)
 				return;
 
-			if (player.IsBot() || !player.IsAlive() || player.PlayerPawn is null or { IsValid: false } || player.PlayerPawn.Value is null)
+			if (!player.IzGud() || !player.IsAlive() || player.PlayerPawn.Value == null)
 				return;
 
 			if (isTransparent)

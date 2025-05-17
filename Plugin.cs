@@ -110,7 +110,7 @@
             state.ShowCenterMessage = true;
             state.ProtectionState = ProtectionState.Protected;
             state.ProtectionTimer = Config.SpawnProtTime;
-            Server.NextFrame(() => HandleTransparentModel(player, true));
+            Server.NextFrame(() => HandleTransparentModel(player));
 
             AddTimer(IsFreezeTime ? _freezeTime : 0f, () => CreateProtectionTimer(player, state));
         }

@@ -5,8 +5,8 @@ namespace SpawnProtection
 
 	public class PlayerState
 	{
-		public ProtectionState ProtectionState { get; set; } = ProtectionState.None;
-		public bool ShowCenterMessage { get; set; }
+		public ProtectionState ProtectionState { get; set; } = ProtectionState.Protected;
+		public bool ShowCenterMessage { get; set; } = true;
 		public float ProtectionTimer { get; set; } = Instance.Config.SpawnProtTime;
 		public Timer? SpawnTimer { get; set; }
 	}

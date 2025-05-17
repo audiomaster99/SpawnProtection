@@ -11,7 +11,6 @@ namespace SpawnProtection
 		public void RegisterEventsListeners()
 		{
 			RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn, HookMode.Pre);
-			RegisterEventHandler<EventRoundPrestart>(OnRoundPrestart);
 			RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
 			RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath, HookMode.Pre);
 			RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
@@ -34,25 +33,14 @@ namespace SpawnProtection
 			RegisterListener<Listeners.OnMapStart>(name =>
 			{
 				protectedPlayers.Clear();
-				AddTimer(1.0f, GetGameRules);
+				gameRules = null;
 
 				AddTimer(1.0f, () =>
 				{
-					_freezeTime = ConVar.Find("mp_freezetime")!.GetPrimitiveValue<int>() - 1;
+					_freezeTime = ConVar.Find("mp_freezetime")!.GetPrimitiveValue<int>();
+					GetGameRules();
 				});
 			});
-		}
-
-		public HookResult OnRoundPrestart(EventRoundPrestart @event, GameEventInfo info)
-		{
-			protectedPlayers.Clear();
-			foreach (var state in _playerStates.Values)
-			{
-				state.ShowCenterMessage = false;
-				state.SpawnTimer?.Kill();
-			}
-
-			return HookResult.Continue;
 		}
 
 		public HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
@@ -71,7 +59,7 @@ namespace SpawnProtection
 		{
 			var player = @event.Userid;
 
-			if (player is null || player.IsBot() || !_playerStates.TryGetValue(player.Index, out var state))
+			if (!player.IzGud() || !_playerStates.TryGetValue(player.Index, out var state))
 				return HookResult.Continue;
 
 			protectedPlayers.Remove(player);
@@ -84,12 +72,8 @@ namespace SpawnProtection
 		{
 			var player = @event.Userid;
 
-			if (player is null || player.IsBot() || !player.IzGud() ||
-				(Config.CTProtOnly && player.Team == CsTeam.Terrorist) ||
-				IsWarmup)
-			{
+			if (!player.IzGud() || (Config.CTProtOnly && player.Team == CsTeam.Terrorist) || IsWarmup)
 				return HookResult.Continue;
-			}
 
 			StartSpawnProtection(player);
 
@@ -102,7 +86,7 @@ namespace SpawnProtection
 			var playerPawn = hook.GetParam<CCSPlayerPawn>(0);
 			var player = playerPawn?.Controller.Value?.As<CCSPlayerController>();
 
-			if (player is null || player.IsBot() || !player.IsProtected())
+			if (!player.IzGud() || !player.IsProtected())
 				return HookResult.Continue;
 
 			hook.SetReturn(false);
@@ -116,7 +100,7 @@ namespace SpawnProtection
 
 			CCSPlayerController? player = @event.Userid;
 
-			if (player is null || player.IsBot() || !player.IsAlive() || !player.IsProtected())
+			if (!player.IzGud() || !player.IsProtected())
 				return HookResult.Continue;
 
 			StopSpawnProtection(player, _playerStates[player.Index]);
@@ -128,7 +112,7 @@ namespace SpawnProtection
 		{
 			CCSPlayerController? player = @event.Userid;
 
-			if (player is not null && player.IzGud() && !player.IsBot())
+			if (player.IzGud())
 				playerCache.Add(player);
 
 			return HookResult.Continue;
@@ -138,7 +122,7 @@ namespace SpawnProtection
 		{
 			CCSPlayerController? player = @event.Userid;
 
-			if (player is null || player.IsBot())
+			if (!player.IzGud())
 				return HookResult.Continue;
 
 			protectedPlayers.Remove(player);
