@@ -12,7 +12,7 @@
         public override string ModuleName => "SpawnProtection";
         public override string ModuleAuthor => "itsAudio @ Kitsune-Lab.com";
         public override string ModuleDescription => "https://github.com/audiomaster99/SpawnProtection";
-        public override string ModuleVersion => "1.0.0";
+        public override string ModuleVersion => "1.0.2";
 
         internal readonly Dictionary<uint, PlayerState> _playerStates = new();
         public static HashSet<CCSPlayerController> playerCache = [];
